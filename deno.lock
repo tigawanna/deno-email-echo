@@ -4,8 +4,12 @@
     "jsr:@hono/hono@^4.7.7": "4.7.7",
     "jsr:@std/dotenv@*": "0.225.3",
     "npm:@tigawanna/hono-pino@*": "0.7.1_hono@4.7.7_pino@9.6.0",
+    "npm:@types/node@*": "22.10.2",
+    "npm:@types/nodemailer@*": "6.4.17",
+    "npm:nodemailer@*": "6.10.1",
     "npm:pino-pretty@*": "13.0.0",
     "npm:pino@*": "9.6.0",
+    "npm:unemail@*": "0.1.0",
     "npm:zod@*": "3.24.3"
   },
   "jsr": {
@@ -23,6 +27,18 @@
         "defu",
         "hono",
         "pino"
+      ]
+    },
+    "@types/node@22.10.2": {
+      "integrity": "sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
+    "@types/nodemailer@6.4.17": {
+      "integrity": "sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==",
+      "dependencies": [
+        "@types/node"
       ]
     },
     "atomic-sleep@1.0.0": {
@@ -63,6 +79,9 @@
     },
     "minimist@1.2.8": {
       "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
+    },
+    "nodemailer@6.10.1": {
+      "integrity": "sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA=="
     },
     "on-exit-leak-free@2.1.2": {
       "integrity": "sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA=="
@@ -156,6 +175,12 @@
         "real-require"
       ]
     },
+    "undici-types@6.20.0": {
+      "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
+    },
+    "unemail@0.1.0": {
+      "integrity": "sha512-pJunGTIDWXJ/lVLyJrOhD5N+LdRnOxXKLWOSFiGBqDM9kQZ2bPQ8h/Iii4nDKFpomzVLlc4cv0xybkEyAlYdhw=="
+    },
     "wrappy@1.0.2": {
       "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="
     },
@@ -165,7 +190,9 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.7.7"
+      "jsr:@hono/hono@^4.7.7",
+      "npm:@types/nodemailer@*",
+      "npm:nodemailer@*"
     ]
   }
 }

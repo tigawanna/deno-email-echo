@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { pinoLogger } from "@/middleware/loggermiddleware.ts";
 import { serveStatic } from 'hono/deno'
 import { AppBindings } from "@/lib/hono/types.ts";
+import emailRoute from "@/routes/email.ts";
 
 
 const app = new Hono<AppBindings>()
@@ -11,11 +12,16 @@ const app = new Hono<AppBindings>()
 app.use(pinoLogger())
 
 
-
 // Serve static files from the "static" directory
 app.use('/static/*', serveStatic({ root: './' }))
 app.get('/', (c) => {
   return c.text('Hello Hono!')
+})
+app.route("/email",emailRoute)
+
+app.onError((err, c) => {
+  c.var.logger.error(err, 'Uncaught error')
+  return c.text('Custom Error Message', 500)
 })
 
 export default app

@@ -1,7 +1,8 @@
 {
   "imports": {
-    "@/":"./src/"
-    "hono": "jsr:@hono/hono@^4.7.7"
+    "@/":"./src/",
+    "hono": "jsr:@hono/hono@^4.7.7",
+    "nodemailer":"npm:nodemailer"
   },
   "tasks": {
         "dev": "deno run -A --unstable-kv --watch  main.ts  ",
@@ -9,6 +10,9 @@
   },
   "compilerOptions": {
     "jsx": "precompile",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "types": [
+      "npm:@types/nodemailer"
+    ]
   }
 }
