@@ -25,12 +25,13 @@ const transporter = createTransport({
 
 export function nodemailerClient(mailOptions:NodemailerInputs) {
     return new Promise<NodemailerResponse>((resolve, reject) => {
-      transporter.sendMail(mailOptions, (error: any, info: any) => {
-        console.log("info ==== ", info);
-        console.log("error ===== ", error);
+      transporter.sendMail(mailOptions, (error: unknown) => {
         if (error) {
+          if(error instanceof Error){
+            reject(error)
+          }  
           reject(
-            new Error("Error sending email: " + error.message)
+            new Error("Error sending email: " + error)
           );
         } else {
           resolve({
