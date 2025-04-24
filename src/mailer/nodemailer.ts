@@ -23,7 +23,7 @@ const transporter = createTransport({
     },
   });
 
-export function nodemailerClient(mailOptions:NodemailerInputs) {
+export function nodemailerClient(mailOptions:NodemailerInputs):Promise<NodemailerResponse|Error> {
     return new Promise<NodemailerResponse>((resolve, reject) => {
       transporter.sendMail(mailOptions, (error: unknown) => {
         if (error) {
