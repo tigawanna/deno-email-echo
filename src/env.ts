@@ -12,6 +12,8 @@ const EnvSchema = z
     AUTH_TOKEN: z.string().min(12),
     BREVO_SMTP_PASSWORD: z.string().min(6),
     BREVO_SMTP_USER: z.string().min(6),
+    TELEGRAM_BOT_TOKEN: z.string().min(3),
+    TELEGRAM_CHANNEL_ID: z.string().min(3),
     // DATABASE_URL: z.string().url(),
     // DATABASE_AUTH_TOKEN: z.string().optional(),
     // API_URL: z.string(),

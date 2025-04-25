@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@hono/hono@^4.7.7": "4.7.7",
     "jsr:@std/dotenv@*": "0.225.3",
+    "npm:@hono/zod-validator@*": "0.4.3_hono@4.7.7_zod@3.24.3",
     "npm:@tigawanna/hono-pino@*": "0.7.1_hono@4.7.7_pino@9.6.0",
     "npm:@types/node@*": "22.10.2",
     "npm:@types/nodemailer@*": "6.4.17",
@@ -21,6 +22,13 @@
     }
   },
   "npm": {
+    "@hono/zod-validator@0.4.3_hono@4.7.7_zod@3.24.3": {
+      "integrity": "sha512-xIgMYXDyJ4Hj6ekm9T9Y27s080Nl9NXHcJkOvkXPhubOLj8hZkOL8pDnnXfvCf5xEE8Q4oMFenQUZZREUY2gqQ==",
+      "dependencies": [
+        "hono",
+        "zod"
+      ]
+    },
     "@tigawanna/hono-pino@0.7.1_hono@4.7.7_pino@9.6.0": {
       "integrity": "sha512-Nteh7yQLdKi4vZOoNk6kucLn4lAwQS/MQIR33NIjTuPF3Z8S0pljQa7y2E/EMdSzSJWpRkuGhDHDmtftxpw2HQ==",
       "dependencies": [

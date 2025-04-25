@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { pinoLogger } from "@/middleware/loggermiddleware.ts";
 import { serveStatic } from 'hono/deno'
 import { AppBindings } from "@/lib/hono/types.ts";
-import emailRoute from "@/routes/email.ts";
+import emailRoute from "./routes/message.ts";
 
 
 const app = new Hono<AppBindings>()
