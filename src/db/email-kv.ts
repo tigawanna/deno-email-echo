@@ -57,7 +57,7 @@ export async function getEmailFromKV({ clientName, subject, from, sent }: ListKV
   for await (const entry of iter) {
     const email = {
       key: entry.key,
-      value: entry.value,
+      value: JSON.parse(entry.value) as EmailMessagePayload,
       versionstamp: entry.versionstamp,
     };
     emails.push(email);

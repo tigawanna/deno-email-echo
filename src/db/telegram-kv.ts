@@ -43,7 +43,7 @@ export async function getTelegramFromKV({ clientName, type, sent }: ListKVTelegr
   for await (const entry of iter) {
     const telegram = {
       key: entry.key,
-      value: entry.value,
+      value: JSON.parse(entry.value) as TelegramPayload,
       versionstamp: entry.versionstamp,
     };
     telegrams.push(telegram);
