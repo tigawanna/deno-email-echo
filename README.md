@@ -1,4 +1,4 @@
-# deno echo
+# deno email echo
 
 A simple service to send emails and backups to telegram and deno kv inscae of email failure 
 use cases include your contact me fomr on your portfolio site or any other form that sends emails with a chance of silent failure
