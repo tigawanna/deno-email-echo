@@ -174,6 +174,7 @@ export class EmailMessage {
       
       // Handle unsuccessful response
       if (!nodemailerResponse.success) {
+        console.error("Nodemailer response error:===> ", nodemailerResponse.error);
         if (this.persistenceOptions.enabled && this.payload.persist) {
           await this.saveFailure(nodemailerResponse.message);
         }
@@ -204,7 +205,7 @@ export class EmailMessage {
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      console.error("Error sending email:", error);
+      console.error("Caught error sending email: ==>", error);
       
       if (this.persistenceOptions.enabled && this.payload.persist) {
         await this.saveFailure(errorMessage);
