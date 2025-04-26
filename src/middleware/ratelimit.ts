@@ -10,11 +10,11 @@ export async function ratelimitMiddleware(c: Context<BlankEnv, "/", BlankInput>,
   const info = getConnInfo(c);
   const ip = info.remote.address;
   if (!ip) {
-    return c.text("no ip?", 429);
+    return c.redirect("/");
   }
   const currentLimit = await kv.get<number>([KV_RATELIMIT, ip]);
   if (currentLimit.value && currentLimit?.value === REQUEST_LIMIT) {
-    return c.text("uwu", 429);
+    return c.redirect("/");
   }
   if (!currentLimit.value) {
     await kv.set([KV_RATELIMIT, ip], 1);
