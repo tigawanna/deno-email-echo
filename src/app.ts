@@ -12,14 +12,15 @@ const app = new Hono<AppBindings>()
 // @ts-expect-error type of c is not correct ,it's types are more alligned with hono-zod-openapi
 app.use(pinoLogger())
 
+app.get('/', (c) => {
+  return c.text('Hello Hono!')
+})
+
 app.use(ratelimitMiddleware)
 app.use(checkToken)
 
 // Serve static files from the "static" directory
 app.use('/static/*', serveStatic({ root: './' }))
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
 app.route("/messages",emailRoute)
 
 app.onError((err, c) => {
