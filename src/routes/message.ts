@@ -8,27 +8,40 @@ import { TelegramMessage } from "@/models/telegram.ts";
 
 const messageRoute = new Hono<AppBindings>();
 
-
-
 messageRoute.post("/email", async (c) => {
   try {
     const body = await c.req.json();
-    const email = EmailMessage.fromRequest(body, "tester");
-    const result = await email.send();
-    if (result.success) {
-      return c.json({ status: result.status });
-    } else {
+    const emailClient = EmailMessage.fromRequestBody(body);
+    
+    // Handle validation errors
+    if (emailClient.type === "error") {
       return c.json(
         {
-          message: result.message,
-          error: result.status,
+          message: emailClient.message,
+          error: emailClient.error,
         },
-        result.statusCode
+        emailClient.statusCode
       );
     }
+    
+    // Send the email
+    const result = await emailClient.client.send();
+    
+    if (result.success) {
+      return c.json({ status: result.status });
+    }
+    
+    return c.json(
+      {
+        message: result.message,
+        error: result.status,
+      },
+      result.statusCode
+    );
   } catch (error) {
     c.var.logger.error(error, "Error caught while sending email");
     console.error("Error sending email:", error);
+    
     return c.json(
       {
         message: "Error sending email",
@@ -42,14 +55,11 @@ messageRoute.post("/email", async (c) => {
 messageRoute.post("/tg", async (c) => {
   try {
     const body = await c.req.json();
-    
     const telegramConfig = {
       botToken: envVariables.TELEGRAM_BOT_TOKEN,
       channelId: envVariables.TELEGRAM_CHANNEL_ID,
     };
-    
     const messageClient = await TelegramMessage.fromRequestBody(body, telegramConfig);
-    
     // Handle validation errors
     if (messageClient.type === "error") {
       return c.json(
@@ -60,14 +70,11 @@ messageRoute.post("/tg", async (c) => {
         messageClient.statusCode
       );
     }
-    
     // Send the message
     const result = await messageClient.client.send();
-    
     if (result.success) {
       return c.json({ status: result.message });
     }
-    
     return c.json(
       {
         message: result.message,
@@ -75,10 +82,9 @@ messageRoute.post("/tg", async (c) => {
       },
       result.statusCode
     );
-    
   } catch (error) {
     c.var.logger.error(error, "Error caught while sending Telegram message");
-    console.error("Error sending Telegram message:", error);   
+    console.error("Error sending Telegram message:", error);
     return c.json(
       {
         message: "Error sending Telegram message",

@@ -1,7 +1,7 @@
 import { ContentfulStatusCode } from "hono/utils/http-status";
-import { TelegramNotifier } from "@/telegram/client.ts";
 import { z } from "npm:zod";
 import { returnValidationData } from "@/lib/zod.ts";
+import { TelegramNotifier } from "@/lib/telegram/client.ts";
 
 interface TelegramConfig {
   botToken: string;
@@ -61,7 +61,6 @@ export class TelegramMessage {
     body: unknown,
     config: TelegramConfig
   ): TelegramMessageClient | TelegramBodyValidationError {
-    // Validate the request body
     const result = this.schema.safeParse(body);
 
     if (!result.success) {

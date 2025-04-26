@@ -37,7 +37,7 @@ export class TelegramNotifier {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      await response.json();
       return {
         success: true,
         message:"Message sent successfully",
