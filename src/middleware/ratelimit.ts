@@ -1,8 +1,8 @@
-import { getConnInfo } from "https://jsr.io/@hono/hono/4.7.7/src/adapter/deno/conninfo.ts";
+import { getConnInfo } from 'hono/deno'
 import { AUTH_TOKEN, KV_RATELIMIT, REQUEST_LIMIT } from "../consts.ts";
 import { kv } from "../db/kv.ts";
 import { BlankEnv, BlankInput, Next } from "hono/types";
-import { Context } from "https://jsr.io/@hono/hono/4.7.7/src/context.ts";
+import { Context } from "hono";
 
 
 export async function ratelimitMiddleware(c: Context<BlankEnv, "/", BlankInput>, next: Next) {

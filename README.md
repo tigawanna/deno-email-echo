@@ -1,14 +1,15 @@
 # deno messages
 
-A simple service to queue and manage messages for email and Telegram notifications.
+A simple service to send emails and backups to telegram and deno kv inscae of email failure 
+use cases include your contact me fomr on your portfolio site or any other form that sends emails with a chance of silent failure
 
 ## Features
 
 - Send emails through a simple API
 - Forward messages to Telegram
-- Persistence options with Deno KX
+- Persistence options with Deno KV
 - Filter and query message history
-- Client name grouping for project organization
+organization
 
 ## Installation
 
