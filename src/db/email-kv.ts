@@ -1,43 +1,46 @@
 import { kv } from "@/db/kv.ts";
-import { KV_EMAIL } from "@/consts.ts";
+import { KV_EMAIL, KV_MESSAGES } from "@/consts.ts";
+import { EmailMessagePayload } from "@/models/email.ts";
 
-export async function saveEmailToKV(
-    payload: {
-        from: string;
-        to: string;
-        subject: string;
-        text: string;
-        sent: "success" | "failed";
-        issue?: string;
-        clientName: string,
-  }
-) {
-  const timestamp = new Date().toISOString();
-  const value = JSON.stringify(payload);
-  await kv.set([KV_EMAIL, payload.clientName, payload.sent, payload.subject, payload.from, timestamp], value);
+interface SaveEmailToKv extends EmailMessagePayload {
+sent: "success" | "failed";
+  issue?: string;
 }
 
-interface ListKVEmailProps {
-  clientName?: string;
+export async function saveEmailToKV(payload: SaveEmailToKv) {
+  const timestamp = new Date().toISOString();
+  const value = JSON.stringify(payload);
+  await kv.set(
+    [KV_MESSAGES,payload.clientName, KV_EMAIL, payload.sent, payload.subject, payload.from, timestamp],
+    value
+  );
+}
+
+interface ListKVEmailProps extends Partial<EmailMessagePayload> {
   sent?: "success" | "failed";
-  subject?: string;
-  from?: string;
 }
 
 export async function getEmailFromKV({ clientName, subject, from, sent }: ListKVEmailProps) {
-  const keys: string[] = [KV_EMAIL];
+  const keys: string[] = [KV_MESSAGES];
+ // Build the key array progressively
+  // Only add subsequent parts if we have the previous ones
   if (clientName) {
     keys.push(clientName);
+    keys.push(KV_EMAIL); // KV_EMAIL is a constant, so we don't need to check if it exists
+    
+    if (sent) {
+      keys.push(sent);
+      
+      if (subject) {
+        keys.push(subject);
+        
+        if (from) {
+          keys.push(from);
+        }
+      }
+    }
   }
-  if (clientName && sent) {
-    keys.push(sent);
-  }
-  if (clientName && sent && subject) {
-    keys.push(subject);
-  }
-  if (clientName && sent && subject && from) {
-    keys.push(from);
-  }
+  
   const iter = kv.list<string>({ prefix: keys });
   const emails = [];
 

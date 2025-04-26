@@ -55,11 +55,7 @@ messageRoute.post("/email", async (c) => {
 messageRoute.post("/tg", async (c) => {
   try {
     const body = await c.req.json();
-    const telegramConfig = {
-      botToken: envVariables.TELEGRAM_BOT_TOKEN,
-      channelId: envVariables.TELEGRAM_CHANNEL_ID,
-    };
-    const messageClient = await TelegramMessage.fromRequestBody(body, telegramConfig);
+    const messageClient = await TelegramMessage.fromRequestBody(body);
     // Handle validation errors
     if (messageClient.type === "error") {
       return c.json(

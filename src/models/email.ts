@@ -1,8 +1,8 @@
-import { saveEmailToKV } from "@/db/email-kv.ts";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { nodemailerClient } from "@/lib/nodemailer/brevo-client.ts";
 import { z } from "npm:zod";
 import { returnValidationData } from "@/lib/zod.ts";
+import { MessagePersistence, PersistenceOptions } from "@/db/message-persistence.ts";
 
 export interface NodemailerInputs {
   from: string;
@@ -33,6 +33,8 @@ export const emailMessagePayload = z.object({
   text: z.string().min(1, "Email body cannot be empty"),
 });
 
+export type EmailMessagePayload = z.infer<typeof emailMessagePayload>;
+
 export type EmailMessageClient = {
   type: "success";
   client: EmailMessage;
@@ -53,13 +55,18 @@ export type EmailBodyValidationError = {
 
 export class EmailMessage {
   private payload: EmailPayload;
+  private persistenceOptions: PersistenceOptions;
   private static schema = emailMessagePayload;
   
-  constructor(payload: EmailPayload) {
+  constructor(payload: EmailPayload, persistenceOptions: PersistenceOptions = { enabled: true }) {
     this.payload = payload;
+    this.persistenceOptions = persistenceOptions;
   }
   
-  static fromRequestBody(body: unknown): EmailMessageClient | EmailBodyValidationError {
+  static fromRequestBody(
+    body: unknown, 
+    persistenceOptions: PersistenceOptions = { enabled: true }
+  ): EmailMessageClient | EmailBodyValidationError {
     const result = this.schema.safeParse(body);
 
     if (!result.success) {
@@ -79,7 +86,7 @@ export class EmailMessage {
         subject: result.data.subject,
         text: result.data.text,
         clientName: result.data.clientName
-      }),
+      }, persistenceOptions),
     };
   }
   
@@ -99,7 +106,9 @@ export class EmailMessage {
       
       // Handle error response
       if (nodemailerResponse instanceof Error) {
-        await this.saveFailure(nodemailerResponse.message);
+        if (this.persistenceOptions.enabled) {
+          await this.saveFailure(nodemailerResponse.message);
+        }
         return {
           success: false,
           message: "Error sending email",
@@ -110,7 +119,9 @@ export class EmailMessage {
       
       // Handle unsuccessful response
       if (!nodemailerResponse.success) {
-        await this.saveFailure(nodemailerResponse.message);
+        if (this.persistenceOptions.enabled) {
+          await this.saveFailure(nodemailerResponse.message);
+        }
         return {
           success: false,
           message: "Unsuccessful sending email",
@@ -120,7 +131,9 @@ export class EmailMessage {
       }
       
       // Handle successful response
-      await this.saveSuccess();
+      if (this.persistenceOptions.enabled) {
+        await this.saveSuccess();
+      }
       return {
         success: true,
         status: nodemailerResponse,
@@ -129,7 +142,10 @@ export class EmailMessage {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error("Error sending email:", error);
-      await this.saveFailure(errorMessage);
+      
+      if (this.persistenceOptions.enabled) {
+        await this.saveFailure(errorMessage);
+      }
       
       return {
         success: false,
@@ -141,17 +157,10 @@ export class EmailMessage {
   }
   
   private async saveSuccess(): Promise<void> {
-    await saveEmailToKV({
-      ...this.payload,
-      sent: "success"
-    });
+    await MessagePersistence.saveEmail(this.payload, "success");
   }
   
   private async saveFailure(issue: string): Promise<void> {
-    await saveEmailToKV({
-      ...this.payload,
-      issue,
-      sent: "failed"
-    });
+    await MessagePersistence.saveEmail(this.payload, "failed", issue);
   }
 }
