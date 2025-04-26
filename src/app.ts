@@ -16,7 +16,7 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
-app.use(ratelimitMiddleware)
+// app.use(ratelimitMiddleware)
 app.use(checkToken)
 
 // Serve static files from the "static" directory
