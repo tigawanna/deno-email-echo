@@ -5,6 +5,7 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
+  
   ALLOWED_ORIGINS: z.array(z.string()).optional(),
   AUTH_TOKEN: z.string().min(12),
   SMTP_PASSWORD: z.string().min(6),

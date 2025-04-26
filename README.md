@@ -42,12 +42,20 @@ LOG_LEVEL=info                         # Logging level (debug/info/warn/error)
 AUTH_TOKEN=your-secret-auth-token      # Authentication token for securing API endpoints
 # ALLOWED_ORIGINS=origin1,origin2      # Comma-separated list of allowed CORS origins
 ```
-```
+
 
 
 
 
 example usage
+
+```json5
+// include the auth token in the header
+{
+  "Authorization": "Bearer <AUTH_TOKEN>"
+}
+
+```
 
 ```json5
 // GET /messages/email
