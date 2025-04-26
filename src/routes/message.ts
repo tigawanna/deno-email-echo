@@ -2,8 +2,6 @@ import { Hono } from "hono";
 import { AppBindings } from "@/lib/hono/types.ts";
 import { getEmailFromKV } from "@/db/email-kv.ts";
 import { EmailMessage } from "@/models/email.ts";
-import { envVariables } from "@/env.ts";
-import console from "node:console";
 import { TelegramMessage } from "@/models/telegram.ts";
 
 const messageRoute = new Hono<AppBindings>();

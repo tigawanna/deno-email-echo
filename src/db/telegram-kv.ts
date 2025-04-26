@@ -4,6 +4,8 @@ import { TelegramPayload } from "@/models/telegram.ts";
 
 interface SaveTelegramToKv extends TelegramPayload {
   sent: "success" | "failed";
+  issue?: string;
+  type: "telegram";
 }
 
 export async function saveTelegramToKV(payload: SaveTelegramToKv) {
@@ -17,6 +19,7 @@ export async function saveTelegramToKV(payload: SaveTelegramToKv) {
 
 interface ListKVTelegramProps extends Partial<TelegramPayload> {
   sent?: "success" | "failed";
+    type?: "telegram";
 }
 
 export async function getTelegramFromKV({ clientName, type, sent }: ListKVTelegramProps) {
