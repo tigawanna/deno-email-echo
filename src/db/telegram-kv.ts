@@ -2,7 +2,13 @@ import { kv } from "@/db/kv.ts";
 import { KV_TELEGRAM, KV_MESSAGES } from "@/consts.ts";
 import { TelegramPayload } from "@/models/telegram.ts";
 
-interface SaveTelegramToKv extends TelegramPayload {
+// type TelegramPayload = {
+//     clientName: string;
+//     type: string;
+//     data: string;
+//     persist?: boolean | undefined;
+// }
+export interface SaveTelegramToKv extends TelegramPayload {
   sent: "success" | "failed";
   issue?: string;
   type: "telegram";
@@ -43,7 +49,7 @@ export async function getTelegramFromKV({ clientName, type, sent }: ListKVTelegr
   for await (const entry of iter) {
     const telegram = {
       key: entry.key,
-      value: JSON.parse(entry.value) as TelegramPayload,
+      value:entry.value,
       versionstamp: entry.versionstamp,
     };
     telegrams.push(telegram);

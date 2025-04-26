@@ -2,7 +2,16 @@ import { kv } from "@/db/kv.ts";
 import { KV_EMAIL, KV_MESSAGES } from "@/consts.ts";
 import { EmailMessagePayload } from "@/models/email.ts";
 
-interface SaveEmailToKv extends EmailMessagePayload {
+// type EmailMessagePayload = {
+//     clientName: string;
+//     from: string;
+//     to: string;
+//     subject: string;
+//     text: string;
+//     persist?: boolean | undefined;
+//     tg?: boolean | undefined;
+// }
+export interface SaveEmailToKv extends EmailMessagePayload {
   sent: "success" | "failed";
   issue?: string;
   type: "email";
@@ -57,7 +66,7 @@ export async function getEmailFromKV({ clientName, subject, from, sent }: ListKV
   for await (const entry of iter) {
     const email = {
       key: entry.key,
-      value: JSON.parse(entry.value) as EmailMessagePayload,
+      value: entry.value,
       versionstamp: entry.versionstamp,
     };
     emails.push(email);

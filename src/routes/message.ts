@@ -4,7 +4,8 @@ import { getEmailFromKV } from "@/db/email-kv.ts";
 import { EmailMessage } from "@/models/email.ts";
 import { TelegramMessage } from "@/models/telegram.ts";
 import { getTelegramFromKV } from "@/db/telegram-kv.ts";
-
+import { emailMessageHtmlRoute} from "@/components/emails.tsx";
+import { tgMessageHtmlRoute } from "@/components/telegrams.tsx";
 
 const messageRoute = new Hono<AppBindings>();
 
@@ -114,6 +115,7 @@ const { clientName, sent, subject, from } = c.req.query()
     );
   }
 });
+
 messageRoute.get("/tg", async (c) => {
 const { clientName, sent } = c.req.query()
   try {
@@ -136,100 +138,9 @@ const { clientName, sent } = c.req.query()
   }
 });
 
+messageRoute.route("/email/html",emailMessageHtmlRoute)
+messageRoute.route("/tg/html",tgMessageHtmlRoute)
 
-messageRoute.get("/list-html", async (c) => {
-  const { clientName, sent, subject, from } = c.req.query();
-  try {
-    const emails = await getEmailFromKV({
-      clientName: clientName,
-      sent: sent as "success" | "failed",
-      subject: subject,
-      from: from,
-    });
 
-    // Create HTML content
-    let html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Email List</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-            th { background-color: #f2f2f2; }
-            tr:hover { background-color: #f5f5f5; }
-            .success { color: green; }
-            .failed { color: red; }
-          </style>
-        </head>
-        <body>
-          <h1>Email List</h1>
-          <table>
-            <tr>
-              <th>From</th>
-              <th>To</th>
-              <th>Subject</th>
-              <th>Status</th>
-              <th>Client</th>
-              <th>Timestamp</th>
-            </tr>
-    `;
-
-    emails.forEach((email) => {
-      const data = JSON.parse(email.value);
-      const timestamp = email.key[email.key.length - 1];
-      html += `
-        <tr>
-          <td>${data.from}</td>
-          <td>${data.to}</td>
-          <td>${data.subject}</td>
-          <td class="${data.sent}">${data.sent}${data.issue ? ` (${data.issue})` : ""}</td>
-          <td>${data.clientName}</td>
-          <td>${String(timestamp)}</td>
-        </tr>
-      `;
-    });
-
-    html += `
-          </table>
-        </body>
-      </html>
-    `;
-
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html",
-      },
-    });
-  } catch (error) {
-    c.var.logger.error(error, "Error caught while getting emails for HTML view");
-    console.error("Error getting emails for HTML view:", error);
-
-    const errorHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Error</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .error { color: red; }
-          </style>
-        </head>
-        <body>
-          <h1 class="error">Error getting emails</h1>
-          <p>${error instanceof Error ? error.message : "Unknown error"}</p>
-        </body>
-      </html>
-    `;
-
-    return new Response(errorHtml, {
-      status: 500,
-      headers: {
-        "Content-Type": "text/html",
-      },
-    });
-  }
-});
 
 export default messageRoute;

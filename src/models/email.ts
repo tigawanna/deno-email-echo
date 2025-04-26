@@ -24,7 +24,7 @@ export const emailMessagePayload = z.object({
   subject: z.string().min(1, "Subject cannot be empty"),
   text: z.string().min(1, "Email body cannot be empty"),
   persist: z.boolean().optional(),
-  tg:z.boolean().optional(),
+  tg: z.boolean().optional(),
 });
 
 export const emailMessageQueryParams = emailMessagePayload
