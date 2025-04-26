@@ -3,7 +3,8 @@ import { nodemailerClient } from "@/lib/nodemailer/brevo-client.ts";
 import { z } from "npm:zod";
 import { returnValidationData } from "@/lib/zod.ts";
 import { MessagePersistence, PersistenceOptions } from "@/db/message-persistence.ts";
-
+import { envVariables } from "@/env.ts";
+import { TelegramNotifier } from "@/lib/telegram/client.ts";
 
 
 
@@ -22,6 +23,7 @@ export const emailMessagePayload = z.object({
   subject: z.string().min(1, "Subject cannot be empty"),
   text: z.string().min(1, "Email body cannot be empty"),
   persist: z.boolean().optional(),
+  tg:z.boolean().optional(),
 });
 
 export const emailMessageQueryParams = emailMessagePayload
@@ -94,7 +96,9 @@ export class EmailMessage {
         to: result.data.to,
         subject: result.data.subject,
         text: result.data.text,
-        clientName: result.data.clientName
+        clientName: result.data.clientName,
+        persist: result.data.persist,
+        tg: result.data.tg
       }, persistenceOptions),
     };
   }
@@ -108,16 +112,57 @@ export class EmailMessage {
     };
   }
   
+  formatTelegramMessage(status: "sent" | "failed", error?: string): string {
+    const formattedDateTime = new Date().toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    
+    return (
+      `📧 Email ${status === "sent" ? "Sent" : "Failed"}\n` +
+      `📅 ${formattedDateTime}\n\n` +
+      `From: ${this.payload.from}\n` +
+      `To: ${this.payload.to}\n` +
+      `Subject: ${this.payload.subject}\n` +
+      (error ? `\n❌ Error: ${error}` : '')
+    );
+  }
+  
+  async forwardToTelegram(status: "sent" | "failed", error?: string): Promise<void> {
+    if (!this.payload.tg) return;
+    
+    try {
+      const telegramNotifier = new TelegramNotifier({
+        botToken: envVariables.TELEGRAM_BOT_TOKEN,
+        channelId: envVariables.TELEGRAM_CHANNEL_ID,
+      });
+      
+      const message = this.formatTelegramMessage(status, error);
+      await telegramNotifier.send(message);
+    } catch (telegramError) {
+      console.error("Failed to forward email to Telegram:", telegramError);
+      // We don't want to fail the email operation if Telegram forwarding fails
+    }
+  }
+  
   async send(): Promise<EmailResponse> {
     try {
       const nodemailerPayload = this.getNodemailerPayload();
       const nodemailerResponse = await nodemailerClient(nodemailerPayload);
       
       // Handle error response
-      if (nodemailerResponse instanceof Error ) {
+      if (nodemailerResponse instanceof Error) {
         if (this.persistenceOptions.enabled && this.payload.persist) {
           await this.saveFailure(nodemailerResponse.message);
         }
+        
+        // Forward to Telegram if tg is true
+        await this.forwardToTelegram("failed", nodemailerResponse.message);
+        
         return {
           success: false,
           message: "Error sending email",
@@ -127,10 +172,14 @@ export class EmailMessage {
       }
       
       // Handle unsuccessful response
-      if (!nodemailerResponse.success && this.payload.persist) {
-        if (this.persistenceOptions.enabled) {
+      if (!nodemailerResponse.success) {
+        if (this.persistenceOptions.enabled && this.payload.persist) {
           await this.saveFailure(nodemailerResponse.message);
         }
+        
+        // Forward to Telegram if tg is true
+        await this.forwardToTelegram("failed", nodemailerResponse.message);
+        
         return {
           success: false,
           message: "Unsuccessful sending email",
@@ -140,9 +189,13 @@ export class EmailMessage {
       }
       
       // Handle successful response
-      if (this.persistenceOptions.enabled) {
+      if (this.persistenceOptions.enabled && this.payload.persist) {
         await this.saveSuccess();
       }
+      
+      // Forward to Telegram if tg is true
+      await this.forwardToTelegram("sent");
+      
       return {
         success: true,
         status: nodemailerResponse,
@@ -152,9 +205,12 @@ export class EmailMessage {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error("Error sending email:", error);
       
-      if (this.persistenceOptions.enabled) {
+      if (this.persistenceOptions.enabled && this.payload.persist) {
         await this.saveFailure(errorMessage);
       }
+      
+      // Forward to Telegram if tg is true
+      await this.forwardToTelegram("failed", errorMessage);
       
       return {
         success: false,
