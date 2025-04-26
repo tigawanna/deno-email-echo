@@ -44,9 +44,6 @@ AUTH_TOKEN=your-secret-auth-token      # Authentication token for securing API e
 ```
 
 
-
-
-
 example usage
 
 ```json5
