@@ -1,10 +1,11 @@
 import { ContentfulStatusCode } from "hono/utils/http-status";
-import { nodemailerClient } from "@/lib/nodemailer/brevo-client.ts";
+
 import { z } from "npm:zod";
 import { returnValidationData } from "@/lib/zod.ts";
 import { MessagePersistence, PersistenceOptions } from "@/db/message-persistence.ts";
 import { envVariables } from "@/env.ts";
 import { TelegramNotifier } from "@/lib/telegram/client.ts";
+import { nodemailerClient } from "@/lib/mailer/nodemailer.ts";
 
 
 

@@ -15,11 +15,11 @@ export interface NodemailerInputs {
 }
 
 const transporter = createTransport({
-    host: "smtp-relay.brevo.com",
+    host: envVariables.SMTP_HOST,
     port: 587,
     auth: {
-      user:envVariables.BREVO_SMTP_USER,
-       pass:envVariables.BREVO_SMTP_PASSWORD,
+      user:envVariables.SMTP_USER,
+       pass:envVariables.SMTP_PASSWORD,
     },
   });
 

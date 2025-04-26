@@ -91,7 +91,7 @@ messageRoute.post("/tg", async (c) => {
   }
 });
 
-messageRoute.get("/email/list", async (c) => {
+messageRoute.get("/email", async (c) => {
 const { clientName, sent, subject, from } = c.req.query()
   try {
     const emails = await getEmailFromKV({
@@ -114,7 +114,7 @@ const { clientName, sent, subject, from } = c.req.query()
     );
   }
 });
-messageRoute.get("/tg/list", async (c) => {
+messageRoute.get("/tg", async (c) => {
 const { clientName, sent } = c.req.query()
   try {
     const emails = await getTelegramFromKV({
