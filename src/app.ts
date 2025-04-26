@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/deno'
 import { AppBindings } from "@/lib/hono/types.ts";
 import emailRoute from "./routes/message.ts";
 import { checkToken, ratelimitMiddleware } from "@/middleware/ratelimit.ts";
+import { envVariables } from "@/env.ts";
 
 
 const app = new Hono<AppBindings>()
@@ -18,6 +19,10 @@ app.get('/', (c) => {
 
 // app.use(ratelimitMiddleware)
 app.use(checkToken)
+
+app.get('/envVariables', (c) => {
+  return c.json(envVariables)
+})
 
 // Serve static files from the "static" directory
 app.use('/static/*', serveStatic({ root: './' }))
