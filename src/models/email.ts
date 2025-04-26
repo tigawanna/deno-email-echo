@@ -4,18 +4,8 @@ import { z } from "npm:zod";
 import { returnValidationData } from "@/lib/zod.ts";
 import { MessagePersistence, PersistenceOptions } from "@/db/message-persistence.ts";
 
-export interface NodemailerInputs {
-  from: string;
-  to: string;
-  subject: string;
-  text: string;
-}
 
-export interface EmailPayload extends NodemailerInputs {
-  clientName: string;
-  sent?: "success" | "failed";
-  issue?: string;
-}
+
 
 export interface EmailResponse {
   success: boolean;
@@ -31,9 +21,28 @@ export const emailMessagePayload = z.object({
   to: z.string().email("Invalid email format"),
   subject: z.string().min(1, "Subject cannot be empty"),
   text: z.string().min(1, "Email body cannot be empty"),
+  persist: z.boolean().optional(),
 });
 
+export const emailMessageQueryParams = emailMessagePayload
+.omit({
+  text: true,
+  to: true,
+})
+.extend({
+  sent: z.enum(["success", "failed"]).optional(),
+})
+.partial()
+
 export type EmailMessagePayload = z.infer<typeof emailMessagePayload>;
+
+export interface EmailPayload extends EmailMessagePayload {
+  clientName: string;
+  sent?: "success" | "failed";
+  issue?: string;
+}
+
+export type NodemailerInputs = Pick<EmailPayload, "from" | "to" | "subject" | "text">;
 
 export type EmailMessageClient = {
   type: "success";
@@ -105,8 +114,8 @@ export class EmailMessage {
       const nodemailerResponse = await nodemailerClient(nodemailerPayload);
       
       // Handle error response
-      if (nodemailerResponse instanceof Error) {
-        if (this.persistenceOptions.enabled) {
+      if (nodemailerResponse instanceof Error ) {
+        if (this.persistenceOptions.enabled && this.payload.persist) {
           await this.saveFailure(nodemailerResponse.message);
         }
         return {
@@ -118,7 +127,7 @@ export class EmailMessage {
       }
       
       // Handle unsuccessful response
-      if (!nodemailerResponse.success) {
+      if (!nodemailerResponse.success && this.payload.persist) {
         if (this.persistenceOptions.enabled) {
           await this.saveFailure(nodemailerResponse.message);
         }

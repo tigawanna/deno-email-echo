@@ -19,6 +19,7 @@ export const telegramMessagePayload = z.object({
   data: z.string(),
   persist: z.boolean().optional(),
 });
+
 export type TelegramPayload = z.infer<typeof telegramMessagePayload>;
 
 export type TelegramMessageClient = {
@@ -77,10 +78,18 @@ export class TelegramMessage {
     };
   }
 
-  formatMessage(): string {
+formatMessage(): string {
+const formattedDateTime = new Date().toLocaleString('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
     return (
-      `**${this.payload.type}**` +
-      `📅 ${new Date().toISOString()}\n\n\n\n` +
+      `${this.payload.type}\n` +
+      `📅 ${formattedDateTime}\n\n` +
       `${this.payload.data}`
     );
   }

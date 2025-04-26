@@ -17,7 +17,7 @@ app.use('/static/*', serveStatic({ root: './' }))
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
-app.route("/email",emailRoute)
+app.route("/messages",emailRoute)
 
 app.onError((err, c) => {
   c.var.logger.error(err, 'Uncaught error')

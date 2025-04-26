@@ -3,6 +3,8 @@ import { AppBindings } from "@/lib/hono/types.ts";
 import { getEmailFromKV } from "@/db/email-kv.ts";
 import { EmailMessage } from "@/models/email.ts";
 import { TelegramMessage } from "@/models/telegram.ts";
+import { getTelegramFromKV } from "@/db/telegram-kv.ts";
+
 
 const messageRoute = new Hono<AppBindings>();
 
@@ -10,7 +12,7 @@ messageRoute.post("/email", async (c) => {
   try {
     const body = await c.req.json();
     const emailClient = EmailMessage.fromRequestBody(body);
-    
+
     // Handle validation errors
     if (emailClient.type === "error") {
       return c.json(
@@ -21,14 +23,14 @@ messageRoute.post("/email", async (c) => {
         emailClient.statusCode
       );
     }
-    
+
     // Send the email
     const result = await emailClient.client.send();
-    
+
     if (result.success) {
       return c.json({ status: result.status });
     }
-    
+
     return c.json(
       {
         message: result.message,
@@ -39,7 +41,7 @@ messageRoute.post("/email", async (c) => {
   } catch (error) {
     c.var.logger.error(error, "Error caught while sending email");
     console.error("Error sending email:", error);
-    
+
     return c.json(
       {
         message: "Error sending email",
@@ -89,14 +91,15 @@ messageRoute.post("/tg", async (c) => {
   }
 });
 
-messageRoute.get("/list", async (c) => {
-  const { clientName, sent, subject, from } = c.req.query();
+messageRoute.get("/email/list", async (c) => {
+const { clientName, sent, subject, from } = c.req.query()
   try {
     const emails = await getEmailFromKV({
       clientName: clientName,
       sent: sent as "success" | "failed",
       subject: subject,
       from: from,
+      type: "email",
     });
     return c.json(emails);
   } catch (error) {
@@ -111,6 +114,28 @@ messageRoute.get("/list", async (c) => {
     );
   }
 });
+messageRoute.get("/tg/list", async (c) => {
+const { clientName, sent } = c.req.query()
+  try {
+    const emails = await getTelegramFromKV({
+      clientName: clientName,
+      sent: sent as "success" | "failed",
+       type: "telegram",
+    });
+    return c.json(emails);
+  } catch (error) {
+    c.var.logger.error(error, "Error catched while getting emails");
+    console.error("Error getting emails:", error);
+    return c.json(
+      {
+        message: "Error getting emails",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      500
+    );
+  }
+});
+
 
 messageRoute.get("/list-html", async (c) => {
   const { clientName, sent, subject, from } = c.req.query();

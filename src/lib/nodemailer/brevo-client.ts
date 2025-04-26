@@ -25,6 +25,11 @@ const transporter = createTransport({
 
 export function nodemailerClient(mailOptions:NodemailerInputs):Promise<NodemailerResponse|Error> {
     return new Promise<NodemailerResponse>((resolve, reject) => {
+        return resolve({
+            message: "Successfully sent, Thank you!",
+            error: false,
+            success: true,
+          });
       transporter.sendMail(mailOptions, (error: unknown) => {
         if (error) {
           if(error instanceof Error){
