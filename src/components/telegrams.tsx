@@ -62,7 +62,7 @@ export const TelegramMessages: FC<TelegramMessagesProps> = (props) => {
   };
 
   return (
-    <Layout title="Telegram Messages">
+    <Layout title="Telegram Messages" isAuthenticated>
       <div class="telegram-container">
         <h1 class="telegram-title">
           <span class="telegram-icon">📱</span> Telegram Messages

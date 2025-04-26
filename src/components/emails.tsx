@@ -64,7 +64,7 @@ export const EmailMessages: FC<EmailMessagesProps> = (props) => {
 
 
   return (
-    <Layout title="Email Messages">
+    <Layout title="Email Messages" isAuthenticated>
       <div class="email-container">
         <h1 class="email-title">
           <span class="email-icon">📧</span> Email Messages

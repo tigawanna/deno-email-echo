@@ -3,6 +3,7 @@ import { AUTH_TOKEN, KV_RATELIMIT, REQUEST_LIMIT } from "../consts.ts";
 import { kv } from "../db/kv.ts";
 import { BlankEnv, BlankInput, Next } from "hono/types";
 import { Context } from "hono";
+import { getCookie } from "hono/cookie";
 
 
 export async function ratelimitMiddleware(c: Context<BlankEnv, "/", BlankInput>, next: Next) {
@@ -26,17 +27,34 @@ export async function ratelimitMiddleware(c: Context<BlankEnv, "/", BlankInput>,
 }
 
 export async function checkToken(c: Context<BlankEnv, "/", BlankInput>, next: Next) {
+  // Check for Authorization header first
   const authorizationHeader = c.req.header("Authorization");
-  if (!authorizationHeader) {
-    return c.text("no authorizationHeader?", 401);
+  let isAuthorized = false;
+  
+  // Validate Authorization header if present
+  if (authorizationHeader) {
+    const bearer = authorizationHeader.split("bearer");
+    if (bearer && bearer.length >= 2) {
+      const token = bearer[1].trim();
+      if (token === AUTH_TOKEN) {
+        isAuthorized = true;
+      }
+    }
   }
-  const bearer = authorizationHeader.split("bearer");
-  if (!bearer || bearer.length < 2) {
-    return c.text("invalid token length", 401);
+  
+  // If not authorized via header, check for auth_token cookie
+  if (!isAuthorized) {
+    const cookieToken = getCookie(c, 'auth_token');
+    if (cookieToken && cookieToken === AUTH_TOKEN) {
+      isAuthorized = true;
+    }
   }
-  const token = bearer[1].trim();
-  if (token !== AUTH_TOKEN) {
-    return c.text("invalid token", 401);
+  
+  // Return 401 if not authorized by either method
+  if (!isAuthorized) {
+    return c.text("Authentication required", 401);
   }
+  
+  // Continue to next middleware/handler if authorized
   return await next();
 }
