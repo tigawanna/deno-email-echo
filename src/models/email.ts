@@ -129,6 +129,7 @@ export class EmailMessage {
       `From: ${this.payload.from}\n` +
       `To: ${this.payload.to}\n` +
       `Subject: ${this.payload.subject}\n` +
+      `Text: ${this.payload.text}\n\n` +
       (error ? `\n❌ Error: ${error}` : '')
     );
   }
