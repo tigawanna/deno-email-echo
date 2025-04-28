@@ -18,6 +18,7 @@ messageRoute.post("/email", async (c) => {
     if (emailClient.type === "error") {
       return c.json(
         {
+          type: "error",
           message: emailClient.message,
           error: emailClient.error,
         },
@@ -27,17 +28,21 @@ messageRoute.post("/email", async (c) => {
 
     // Send the email
     const result = await emailClient.client.send();
-
-    if (result.success) {
-      return c.json({ status: result.status });
+    if (!result.success) {
+      return c.json({ 
+        type: "error",
+        message: result.message,
+        error: result.message,
+       },
+       result.statusCode);
     }
 
     return c.json(
       {
+        type: "success",
         message: result.message,
-        error: result.status,
       },
-      result.statusCode
+      200
     );
   } catch (error) {
     c.var.logger.error(error, "Error caught while sending email");
@@ -45,6 +50,7 @@ messageRoute.post("/email", async (c) => {
 
     return c.json(
       {
+        type: "error",
         message: "Error sending email",
         error: error instanceof Error ? error.message : "Unknown error",
       },
@@ -61,6 +67,7 @@ messageRoute.post("/tg", async (c) => {
     if (messageClient.type === "error") {
       return c.json(
         {
+          type: "error",
           message: messageClient.message,
           error: messageClient.error,
         },
@@ -69,11 +76,17 @@ messageRoute.post("/tg", async (c) => {
     }
     // Send the message
     const result = await messageClient.client.send();
-    if (result.success) {
-      return c.json({ status: result.message });
+    if (!result.success) {
+      return c.json({ 
+        type: "error",
+        message: result.message,
+        error: result.message,
+       },
+       result.statusCode);
     }
     return c.json(
       {
+        type: "success",
         message: result.message,
         error: result.error,
       },
